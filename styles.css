@@ -134,13 +134,6 @@ button.danger:hover {
   margin-top: var(--spacing-large);
 }
 
-#word-list li {
-  padding: var(--spacing-base) 0;
-  border-bottom: 1px solid var(--color-border);
-  font-size: 0.9rem;
-  color: var(--color-tertiary);
-}
-
 /* Main content */
 .main-content {
   max-width: 800px;
@@ -388,21 +381,77 @@ button.danger:hover {
   }
 }
 
+/* Word list item styles */
 .word-list-panel #word-list li {
-  padding: var(--spacing-base) 0;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-base);
   border-bottom: 1px solid var(--color-border);
+  position: relative;
 }
 
-.word-list-panel #word-list h3 {
+.word-list-panel #word-list li h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--color-primary);
   font-weight: 500;
+  flex: 1;
 }
 
-.word-list-panel #word-list span {
+.word-list-panel #word-list li span {
   font-size: 0.8rem;
   color: var(--color-tertiary);
-  display: block;
-  margin-top: 4px;
+  margin-right: var(--spacing-base);
+}
+
+.word-list-panel #word-list li button.delete-word {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: bold;
+  padding: 4px 8px;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+}
+
+.word-list-panel #word-list li button.delete-word:hover {
+  opacity: 1;
+  color: #dc3545;
+}
+
+/* Add loader styles */
+.countdown-loader {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto var(--spacing-large);
+  position: relative;
+}
+
+.countdown-loader svg {
+  transform: rotate(-90deg);
+}
+
+.countdown-loader circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.countdown-loader .background {
+  stroke: var(--color-border);
+}
+
+.countdown-loader .progress {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.countdown-time {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  color: var(--color-primary);
 } 

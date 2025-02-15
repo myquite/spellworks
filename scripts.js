@@ -11,6 +11,12 @@ const wordListPanel = document.getElementById('word-list-panel');
 wordListToggle.addEventListener('click', (e) => {
   e.stopPropagation();
   wordListPanel.classList.toggle('open');
+  
+  // If panel is being opened, focus the input
+  if (wordListPanel.classList.contains('open')) {
+    newWordInput.focus();
+  }
+  
   if (isMobile()) {
     document.body.style.overflow = wordListPanel.classList.contains('open') ? 'hidden' : '';
   }
@@ -18,21 +24,16 @@ wordListToggle.addEventListener('click', (e) => {
 
 // Close panel when clicking outside
 document.addEventListener('click', (e) => {
-  // Only proceed if panel is open
   if (!wordListPanel.classList.contains('open')) return;
-  
-  // Close if click is outside panel and toggle button
   if (!wordListPanel.contains(e.target) && e.target !== wordListToggle) {
-    wordListPanel.classList.remove('open');
-    document.body.style.overflow = '';
+    closeWordListPanel();
   }
 });
 
 // Add escape key to close panel
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && wordListPanel.classList.contains('open')) {
-    wordListPanel.classList.remove('open');
-    document.body.style.overflow = '';
+    closeWordListPanel();
   }
 });
 
@@ -47,8 +48,8 @@ window.addEventListener('resize', () => {
 // Each word object will have: { word, interval, nextReview }
 let wordsData = [];
 
-// Default interval (in milliseconds) for a new or failed word (1 minute)
-const DEFAULT_INTERVAL = 60000;
+// Update the default interval from 60s to 30s
+const DEFAULT_INTERVAL = 30000; // 30 seconds instead of 60 seconds
 
 // Grab DOM elements
 const newWordInput = document.getElementById("new-word-input");
@@ -73,7 +74,7 @@ function saveWordsToStorage() {
 // Update the word list display
 function updateWordListDisplay() {
   wordListEl.innerHTML = "";
-  wordsData.forEach((wordObj) => {
+  wordsData.forEach((wordObj, index) => {
     const li = document.createElement("li");
     
     // Create word header
@@ -82,15 +83,23 @@ function updateWordListDisplay() {
     
     // Create metadata span
     const metadata = document.createElement("span");
-    const nextReviewTime = new Date(wordObj.nextReview).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
     metadata.textContent = `${Math.round(wordObj.interval / 1000)}s`;
+    
+    // Create delete button
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add('delete-word');
+    deleteBtn.textContent = '×';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      wordsData.splice(index, 1);
+      updateWordListDisplay();
+      loadNextWord();
+    });
     
     // Add elements to list item
     li.appendChild(wordHeader);
     li.appendChild(metadata);
+    li.appendChild(deleteBtn);
     wordListEl.appendChild(li);
   });
   saveWordsToStorage();
@@ -108,6 +117,15 @@ addWordButton.addEventListener("click", () => {
   newWordInput.value = "";
   updateWordListDisplay();
   loadNextWord();
+  // Set focus back to input
+  newWordInput.focus();
+});
+
+// Also add Enter key functionality to the input
+newWordInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    addWordButton.click();
+  }
 });
 
 // Add reset button functionality
@@ -142,17 +160,69 @@ function loadNextWord() {
   updateProgress();
   
   if (dueWords.length === 0) {
-    testContainer.innerHTML = `
-      <div class="completion-message">
-        <h2>WELL DONE!</h2>
-        <p>Check back later for another round of practice.</p>
-      </div>
-    `;
+    // Find the next due word
+    const nextDueWord = wordsData.reduce((earliest, word) => {
+      return (!earliest || word.nextReview < earliest.nextReview) ? word : earliest;
+    }, null);
+    
+    if (nextDueWord) {
+      const timeRemaining = nextDueWord.nextReview - Date.now();
+      const secondsRemaining = Math.ceil(timeRemaining / 1000);
+      
+      testContainer.innerHTML = `
+        <div class="completion-message">
+          <div class="countdown-loader">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle class="background" cx="50" cy="50" r="45"/>
+              <circle class="progress" cx="50" cy="50" r="45"/>
+            </svg>
+            <div class="countdown-time">${secondsRemaining}s</div>
+          </div>
+          <h2>WELL DONE!</h2>
+          <p>Check back later for another round of practice.</p>
+        </div>
+      `;
+      
+      // Start countdown animation
+      const progressCircle = testContainer.querySelector('.progress');
+      const timeDisplay = testContainer.querySelector('.countdown-time');
+      const circumference = 2 * Math.PI * 45;
+      
+      progressCircle.style.strokeDasharray = circumference;
+      progressCircle.style.strokeDashoffset = 0;
+      
+      let timeLeft = secondsRemaining;
+      const countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          loadNextWord();
+        } else {
+          timeDisplay.textContent = `${timeLeft}s`;
+          const progress = (timeLeft / secondsRemaining) * circumference;
+          progressCircle.style.strokeDashoffset = circumference - progress;
+        }
+      }, 1000);
+    }
+    
+    // Set focus to add word input if word list is open
+    if (wordListPanel.classList.contains('open')) {
+      newWordInput.focus();
+    }
     return;
   }
+  
   dueWords.sort((a, b) => a.nextReview - b.nextReview);
   const currentWordObj = dueWords[0];
   startTestForWord(currentWordObj);
+  
+  // Set focus based on panel state
+  if (wordListPanel.classList.contains('open')) {
+    newWordInput.focus();
+  } else {
+    const firstInput = document.querySelector('.letter-input');
+    if (firstInput) firstInput.focus();
+  }
 }
 
 // Start the test for a given word object
@@ -165,6 +235,8 @@ function startTestForWord(wordObj) {
 
   // Create inputs...
   const letterInputs = [];
+  let hasError = false; // Track if any errors occurred while typing
+  
   for (let i = 0; i < wordObj.word.length; i++) {
     const input = document.createElement("input");
     input.type = "text";
@@ -185,6 +257,12 @@ function startTestForWord(wordObj) {
         input.classList.add('correct');
       } else {
         input.classList.add('incorrect');
+        hasError = true; // Mark that an error occurred
+        
+        // Immediately mark word as incorrect and reset interval
+        wordObj.interval = DEFAULT_INTERVAL;
+        wordObj.nextReview = Date.now() + DEFAULT_INTERVAL;
+        updateWordListDisplay();
       }
       
       // Move to next input if available
@@ -194,14 +272,14 @@ function startTestForWord(wordObj) {
       
       // Check full word if this is the last input
       if (input.value.length === 1 && i === wordObj.word.length - 1) {
-        checkSpelling(wordObj, letterInputs);
+        checkSpelling(wordObj, letterInputs, hasError);
       }
     });
 
     // Add keydown event listener for Enter key and Backspace
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        checkSpelling(wordObj, letterInputs);
+        checkSpelling(wordObj, letterInputs, hasError);
       }
       // Handle backspace/delete
       if ((e.key === "Backspace" || e.key === "Delete") && input.value === "") {
@@ -247,7 +325,7 @@ function startTestForWord(wordObj) {
 
   // Remove feedback element creation and reference
   checkButton.addEventListener("click", () => {
-    checkSpelling(wordObj, letterInputs);
+    checkSpelling(wordObj, letterInputs, hasError);
   });
 
   // Add this to handle mobile keyboard
@@ -305,11 +383,10 @@ function updateProgress() {
 }
 
 // Update the checkSpelling function
-function checkSpelling(wordObj, letterInputs) {
+function checkSpelling(wordObj, letterInputs, hasError) {
   const userSpelling = letterInputs.map((input) => input.value).join("");
   
-  if (userSpelling.toLowerCase() === wordObj.word.toLowerCase()) {
-    // Correct word - add success animation to all inputs
+  if (userSpelling.toLowerCase() === wordObj.word.toLowerCase() && !hasError) {
     letterInputs.forEach(input => {
       input.classList.add('correct');
     });
@@ -323,13 +400,12 @@ function checkSpelling(wordObj, letterInputs) {
     wordsCompleted++;
     updateProgress();
     
-    setTimeout(loadNextWord, 1500);
+    setTimeout(loadNextWord, 750);
   } else {
-    // Check each letter and animate incorrect ones
     letterInputs.forEach((input, index) => {
       if (input.value.toLowerCase() !== wordObj.word[index].toLowerCase()) {
         input.classList.add('incorrect');
-        setTimeout(() => input.classList.remove('incorrect'), 500);
+        setTimeout(() => input.classList.remove('incorrect'), 250);
       }
     });
     
@@ -339,9 +415,14 @@ function checkSpelling(wordObj, letterInputs) {
   }
 }
 
-// Add close button functionality
-const closeButton = document.querySelector('.close-panel');
-closeButton.addEventListener('click', () => {
+// Update panel close handlers to set focus to first letter input
+function closeWordListPanel() {
   wordListPanel.classList.remove('open');
   document.body.style.overflow = '';
-}); 
+  const firstInput = document.querySelector('.letter-input');
+  if (firstInput) firstInput.focus();
+}
+
+// Add close button functionality
+const closeButton = document.querySelector('.close-panel');
+closeButton.addEventListener('click', closeWordListPanel); 
