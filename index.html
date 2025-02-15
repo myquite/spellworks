@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spellworks</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="main-header">
+      <h1>Spellworks</h1>
+      <nav>
+        <button id="word-list-toggle">Word List</button>
+      </nav>
+    </header>
+
+    <div id="word-list-panel" class="word-list-panel">
+      <div class="panel-header">
+        <button class="close-panel">×</button>
+        <h2>Word List</h2>
+      </div>
+      <div class="input-group">
+        <input type="text" id="new-word-input" placeholder="Enter new word" />
+        <button id="add-word-button">Add</button>
+      </div>
+      <ul id="word-list"></ul>
+      <button id="reset-button" class="danger">Reset List</button>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="progress-stats">
+        <span><span class="words-completed">0</span> / <span class="words-remaining">0</span></span>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="container">
+        <div id="test-container">
+          <!-- Test content will be injected here -->
+        </div>
+      </div>
+    </div>
+
+    <script src="scripts.js"></script>
+  </body>
+</html>

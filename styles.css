@@ -1,0 +1,408 @@
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Monochromatic color palette */
+  --color-primary: #2c2c2c;
+  --color-secondary: #4a4a4a;
+  --color-tertiary: #6c6c6c;
+  --color-border: #e0e0e0;
+  --color-background: #ffffff;
+  --color-success: #e8f5e9;
+  --color-error: #ffebee;
+  
+  /* Typography */
+  --font-primary: system-ui, -apple-system, sans-serif;
+  
+  /* Spacing */
+  --spacing-base: 8px;
+  --spacing-large: 24px;
+}
+
+body {
+  font-family: var(--font-primary);
+  line-height: 1.6;
+  background: var(--color-background);
+  color: var(--color-primary);
+  padding: var(--spacing-large);
+}
+
+/* Typography */
+h1 {
+  font-size: 2rem;
+  font-weight: 300; /* Using lighter weight for minimalist feel */
+  letter-spacing: -0.5px;
+}
+
+/* Header */
+.main-header {
+  padding: var(--spacing-large);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-large);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  position: relative;
+}
+
+.main-header h1 {
+  margin: 0;
+  font-weight: bolder;
+  text-align: center;
+}
+
+.main-header nav {
+  position: absolute;
+  right: var(--spacing-large);
+}
+
+/* Progress bar and stats */
+.progress-container {
+  margin: var(--spacing-large) 0;
+  text-align: center;
+}
+
+.progress-bar {
+  height: 2px;
+  background: var(--color-border);
+  margin: var(--spacing-base) auto;
+  max-width: 200px;
+}
+
+.progress-stats {
+  font-size: 0.9rem;
+  color: var(--color-tertiary);
+}
+
+.progress-fill {
+  background: var(--color-primary);
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Input styling */
+input {
+  width: 100%;
+  padding: var(--spacing-base);
+  border: 1px solid var(--color-border);
+  border-radius: 0; /* Remove border radius for cleaner look */
+  margin-bottom: var(--spacing-base);
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Button styling - more minimal */
+button {
+  padding: var(--spacing-base) var(--spacing-large);
+  background: var(--color-primary);
+  color: var(--color-background);
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  background: var(--color-secondary);
+}
+
+button.danger {
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid currentColor;
+}
+
+button.danger:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* Word list */
+#word-list {
+  list-style: none;
+  margin-top: var(--spacing-large);
+}
+
+#word-list li {
+  padding: var(--spacing-base) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  color: var(--color-tertiary);
+}
+
+/* Main content */
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-large);
+}
+
+/* Letter inputs */
+.letters-container {
+  display: flex;
+  gap: var(--spacing-base);
+  justify-content: center;
+  margin: var(--spacing-large) 0;
+  flex-wrap: wrap;
+}
+
+.letter-input {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 1.2rem;
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.letter-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.letter-input.incorrect {
+  border-color: #dc3545;
+  border-width: 3px;
+  transform: scale(1.1);
+}
+
+.letter-input.correct {
+  border-color: #4CAF50;
+  border-width: 3px;
+  transform: scale(1.1);
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-large);
+  justify-content: center;
+  margin: var(--spacing-large) 0;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-base);
+}
+
+/* Feedback messages */
+#feedback {
+  text-align: center;
+  padding: var(--spacing-base);
+  margin-top: var(--spacing-large);
+  font-size: 0.9rem;
+}
+
+#feedback.correct {
+  background: var(--color-success);
+}
+
+#feedback.incorrect {
+  background: var(--color-error);
+}
+
+/* Menu button */
+.menu-button {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--spacing-large);
+  z-index: 1000;
+  background: transparent;
+  padding: var(--spacing-base);
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  :root {
+    --spacing-large: 16px; /* Smaller spacing on mobile */
+  }
+
+  body {
+    padding: var(--spacing-base);
+  }
+
+  .main-header {
+    flex-direction: column;
+    gap: var(--spacing-base);
+    padding: var(--spacing-base);
+  }
+
+  .main-header nav {
+    position: static;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  #word-list-toggle {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .menu-button {
+    left: var(--spacing-base);
+  }
+}
+
+/* Replace celebration styles with completion message styles */
+.completion-message {
+  text-align: center;
+  padding: var(--spacing-large);
+  margin-top: var(--spacing-large);
+}
+
+.completion-message h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: var(--spacing-large);
+  color: var(--color-primary);
+}
+
+.completion-message p {
+  color: var(--color-tertiary);
+  font-size: 1.1rem;
+}
+
+/* Word list panel styles */
+.word-list-panel {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100vh;
+  background: var(--color-background);
+  border-left: 1px solid var(--color-border);
+  padding: var(--spacing-large);
+  transition: right 0.3s ease;
+  overflow-y: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.word-list-panel.open {
+  right: 0;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+}
+
+.word-list-panel .panel-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-large);
+  height: 40px;
+  position: relative;
+}
+
+.word-list-panel .panel-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--color-primary);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.word-list-panel .close-panel {
+  background: transparent;
+  color: var(--color-primary);
+  padding: 0;
+  width: 40px;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  z-index: 1;
+}
+
+.word-list-panel .close-panel:hover {
+  background: var(--color-border);
+}
+
+.word-list-panel .input-group {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  gap: var(--spacing-base);
+  margin-bottom: var(--spacing-large);
+}
+
+.word-list-panel .input-group input {
+  margin: 0;
+  height: 100%;
+}
+
+.word-list-panel .input-group button {
+  height: 100%;
+  padding: 0 var(--spacing-large);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.word-list-panel #word-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.word-list-panel #reset-button {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* Style the word list toggle button */
+#word-list-toggle {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+
+#word-list-toggle:hover {
+  background: var(--color-border);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .word-list-panel {
+    width: 100%;
+    right: -100%;
+  }
+}
+
+.word-list-panel #word-list li {
+  padding: var(--spacing-base) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.word-list-panel #word-list h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.word-list-panel #word-list span {
+  font-size: 0.8rem;
+  color: var(--color-tertiary);
+  display: block;
+  margin-top: 4px;
+} 
