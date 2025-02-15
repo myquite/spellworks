@@ -39,12 +39,9 @@ window.addEventListener('resize', () => {
   }
 });
 
-// Array to hold word objects for spaced repetition.
-// Each word object will have: { word, interval, nextReview }
+// Array to hold word objects
+// Each word object will have: { word }
 let wordsData = [];
-
-// Default interval for new words
-const DEFAULT_INTERVAL = 30000; // 30 seconds
 
 // Grab DOM elements
 const newWordInput = document.getElementById("new-word-input");
@@ -57,7 +54,10 @@ function loadWordsFromStorage() {
   const savedWords = localStorage.getItem('spellingWords');
   if (savedWords) {
     wordsData = JSON.parse(savedWords);
+    totalWords = wordsData.length;
+    wordsCompleted = 0;
     updateWordListDisplay();
+    updateProgress();
   }
 }
 
@@ -76,10 +76,6 @@ function updateWordListDisplay() {
     const wordHeader = document.createElement("h3");
     wordHeader.textContent = wordObj.word;
     
-    // Create metadata span
-    const metadata = document.createElement("span");
-    metadata.textContent = `${Math.round(wordObj.interval / 1000)}s`;
-    
     // Create delete button
     const deleteBtn = document.createElement("button");
     deleteBtn.classList.add('delete-word');
@@ -93,7 +89,6 @@ function updateWordListDisplay() {
     
     // Add elements to list item
     li.appendChild(wordHeader);
-    li.appendChild(metadata);
     li.appendChild(deleteBtn);
     wordListEl.appendChild(li);
   });
@@ -105,14 +100,11 @@ addWordButton.addEventListener("click", () => {
   const newWord = newWordInput.value.trim();
   if (newWord === "") return;
   wordsData.push({
-    word: newWord,
-    interval: DEFAULT_INTERVAL,
-    nextReview: Date.now(),
+    word: newWord
   });
   newWordInput.value = "";
   updateWordListDisplay();
   loadNextWord();
-  // Set focus back to input
   newWordInput.focus();
 });
 
@@ -130,7 +122,7 @@ resetButton.addEventListener('click', () => {
     wordsData = [];
     localStorage.removeItem('spellingWords');
     wordsCompleted = 0;
-    totalWordsForSession = 0;
+    totalWords = 0;
     updateProgress();
     updateWordListDisplay();
     loadNextWord();
@@ -140,12 +132,14 @@ resetButton.addEventListener('click', () => {
 // Load saved words when the page loads
 window.addEventListener("load", () => {
   loadWordsFromStorage();
+  totalWords = wordsData.length;
+  updateProgress();
   loadNextWord();
 });
 
 // Variables for progress tracking
 let wordsCompleted = 0;
-let totalWordsForSession = 0;
+let totalWords = wordsData.length;
 
 function loadNextWord() {
   if (wordsData.length === 0) {
@@ -156,38 +150,35 @@ function loadNextWord() {
       </div>
     `;
     wordsCompleted = 0;
-    totalWordsForSession = 0;
+    totalWords = 0;
     updateProgress();
     return;
   }
 
-  const now = Date.now();
-  const dueWords = wordsData.filter(
-    (wordObj) => wordObj.nextReview <= now
-  );
-
-  // Set total words for new session
-  if (dueWords.length > 0 && totalWordsForSession === 0) {
-    totalWordsForSession = dueWords.length;
-    wordsCompleted = 0;
-  }
-  updateProgress();
+  totalWords = wordsData.length;
   
-  if (dueWords.length === 0) {
+  // Show completion message when all words are done
+  if (wordsCompleted >= totalWords) {
     testContainer.innerHTML = `
       <div class="completion-message">
         <h2>WELL DONE!</h2>
         <p>All words have been practiced.</p>
+        <button id="practice-again" class="practice-again-btn">Practice Again?</button>
       </div>
     `;
-    wordsCompleted = 0;
-    totalWordsForSession = 0;
-    updateProgress();
+    
+    const practiceAgainBtn = document.querySelector('#practice-again');
+    practiceAgainBtn.addEventListener('click', () => {
+      wordsCompleted = 0;
+      updateProgress();
+      loadNextWord();
+    });
+    
     return;
   }
   
-  dueWords.sort((a, b) => a.nextReview - b.nextReview);
-  const currentWordObj = dueWords[0];
+  // Get the first word in the list
+  const currentWordObj = wordsData[0];
   startTestForWord(currentWordObj);
   
   // Set focus based on panel state
@@ -333,11 +324,11 @@ function updateProgress() {
   const wordsCompletedEl = document.querySelector('.words-completed');
   const wordsRemainingEl = document.querySelector('.words-remaining');
   
-  const progressPercentage = totalWordsForSession ? (wordsCompleted / totalWordsForSession) * 100 : 0;
+  const progressPercentage = totalWords ? (wordsCompleted / totalWords) * 100 : 0;
   progressFill.style.width = `${progressPercentage}%`;
   
   wordsCompletedEl.textContent = wordsCompleted;
-  wordsRemainingEl.textContent = totalWordsForSession;
+  wordsRemainingEl.textContent = totalWords;
 }
 
 // Update the checkSpelling function
@@ -349,10 +340,8 @@ function checkSpelling(wordObj, letterInputs) {
       input.classList.add('correct');
     });
     
-    wordObj.interval = wordObj.interval
-      ? wordObj.interval * 2
-      : DEFAULT_INTERVAL;
-    wordObj.nextReview = Date.now() + wordObj.interval;
+    // Move word to end of list
+    wordsData.push(wordsData.shift());
     updateWordListDisplay();
     
     wordsCompleted++;
@@ -367,8 +356,6 @@ function checkSpelling(wordObj, letterInputs) {
       }
     });
     
-    wordObj.interval = DEFAULT_INTERVAL;
-    wordObj.nextReview = Date.now() + DEFAULT_INTERVAL;
     updateWordListDisplay();
   }
 }

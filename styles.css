@@ -457,4 +457,19 @@ button.danger:hover {
   .github-corner .octo-arm {
     animation: octocat-wave 560ms ease-in-out;
   }
+}
+
+.practice-again-btn {
+  margin-top: var(--spacing-large);
+  padding: var(--spacing-large) var(--spacing-large);
+  font-size: 1.2rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.practice-again-btn:hover {
+  background: var(--color-secondary);
 } 
