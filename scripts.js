@@ -235,7 +235,6 @@ function startTestForWord(wordObj) {
 
   // Create inputs...
   const letterInputs = [];
-  let hasError = false; // Track if any errors occurred while typing
   
   for (let i = 0; i < wordObj.word.length; i++) {
     const input = document.createElement("input");
@@ -257,29 +256,18 @@ function startTestForWord(wordObj) {
         input.classList.add('correct');
       } else {
         input.classList.add('incorrect');
-        hasError = true; // Mark that an error occurred
-        
-        // Immediately mark word as incorrect and reset interval
-        wordObj.interval = DEFAULT_INTERVAL;
-        wordObj.nextReview = Date.now() + DEFAULT_INTERVAL;
-        updateWordListDisplay();
       }
       
       // Move to next input if available
       if (input.value.length === 1 && letterInputs[i + 1]) {
         letterInputs[i + 1].focus();
       }
-      
-      // Check full word if this is the last input
-      if (input.value.length === 1 && i === wordObj.word.length - 1) {
-        checkSpelling(wordObj, letterInputs, hasError);
-      }
     });
 
     // Add keydown event listener for Enter key and Backspace
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        checkSpelling(wordObj, letterInputs, hasError);
+        checkSpelling(wordObj, letterInputs);
       }
       // Handle backspace/delete
       if ((e.key === "Backspace" || e.key === "Delete") && input.value === "") {
@@ -325,7 +313,7 @@ function startTestForWord(wordObj) {
 
   // Remove feedback element creation and reference
   checkButton.addEventListener("click", () => {
-    checkSpelling(wordObj, letterInputs, hasError);
+    checkSpelling(wordObj, letterInputs);
   });
 
   // Add this to handle mobile keyboard
@@ -383,10 +371,10 @@ function updateProgress() {
 }
 
 // Update the checkSpelling function
-function checkSpelling(wordObj, letterInputs, hasError) {
+function checkSpelling(wordObj, letterInputs) {
   const userSpelling = letterInputs.map((input) => input.value).join("");
   
-  if (userSpelling.toLowerCase() === wordObj.word.toLowerCase() && !hasError) {
+  if (userSpelling.toLowerCase() === wordObj.word.toLowerCase()) {
     letterInputs.forEach(input => {
       input.classList.add('correct');
     });
