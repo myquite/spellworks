@@ -260,6 +260,7 @@ button.danger:hover {
   text-align: center;
   padding: var(--spacing-large);
   margin-top: var(--spacing-large);
+  animation: fadeIn 0.5s ease;
 }
 
 .completion-message h2 {
@@ -272,6 +273,18 @@ button.danger:hover {
 .completion-message p {
   color: var(--color-tertiary);
   font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Word list panel styles */

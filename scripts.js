@@ -1,8 +1,3 @@
-// Add these helper functions at the top
-function isMobile() {
-  return window.innerWidth < 768;
-}
-
 // Replace sidebar toggle code with this
 const wordListToggle = document.getElementById('word-list-toggle');
 const wordListPanel = document.getElementById('word-list-panel');
@@ -48,8 +43,8 @@ window.addEventListener('resize', () => {
 // Each word object will have: { word, interval, nextReview }
 let wordsData = [];
 
-// Update the default interval from 60s to 30s
-const DEFAULT_INTERVAL = 30000; // 30 seconds instead of 60 seconds
+// Default interval for new words
+const DEFAULT_INTERVAL = 30000; // 30 seconds
 
 // Grab DOM elements
 const newWordInput = document.getElementById("new-word-input");
@@ -150,13 +145,28 @@ window.addEventListener("load", () => {
 
 // Load the next word that is due for review
 function loadNextWord() {
+  if (wordsData.length === 0) {
+    testContainer.innerHTML = `
+      <div class="completion-message">
+        <h2>WELCOME!</h2>
+        <p>Please add some words to your list to get started.</p>
+      </div>
+    `;
+    wordsCompleted = 0;
+    totalWordsForSession = 0;
+    updateProgress();
+    return;
+  }
+
   const now = Date.now();
   const dueWords = wordsData.filter(
     (wordObj) => wordObj.nextReview <= now
   );
   
-  // Update progress stats
-  totalWordsForSession = dueWords.length + wordsCompleted;
+  // Only set total words when starting a new session
+  if (dueWords.length > 0 && totalWordsForSession === 0) {
+    totalWordsForSession = dueWords.length;
+  }
   updateProgress();
   
   if (dueWords.length === 0) {
@@ -166,6 +176,11 @@ function loadNextWord() {
     }, null);
     
     if (nextDueWord) {
+      // Reset progress for next round
+      wordsCompleted = 0;
+      totalWordsForSession = 0;
+      updateProgress();
+      
       const timeRemaining = nextDueWord.nextReview - Date.now();
       const secondsRemaining = Math.ceil(timeRemaining / 1000);
       
