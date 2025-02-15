@@ -143,7 +143,10 @@ window.addEventListener("load", () => {
   loadNextWord();
 });
 
-// Load the next word that is due for review
+// Variables for progress tracking
+let wordsCompleted = 0;
+let totalWordsForSession = 0;
+
 function loadNextWord() {
   if (wordsData.length === 0) {
     testContainer.innerHTML = `
@@ -162,68 +165,24 @@ function loadNextWord() {
   const dueWords = wordsData.filter(
     (wordObj) => wordObj.nextReview <= now
   );
-  
-  // Only set total words when starting a new session
+
+  // Set total words for new session
   if (dueWords.length > 0 && totalWordsForSession === 0) {
     totalWordsForSession = dueWords.length;
+    wordsCompleted = 0;
   }
   updateProgress();
   
   if (dueWords.length === 0) {
-    // Find the next due word
-    const nextDueWord = wordsData.reduce((earliest, word) => {
-      return (!earliest || word.nextReview < earliest.nextReview) ? word : earliest;
-    }, null);
-    
-    if (nextDueWord) {
-      // Reset progress for next round
-      wordsCompleted = 0;
-      totalWordsForSession = 0;
-      updateProgress();
-      
-      const timeRemaining = nextDueWord.nextReview - Date.now();
-      const secondsRemaining = Math.ceil(timeRemaining / 1000);
-      
-      testContainer.innerHTML = `
-        <div class="completion-message">
-          <div class="countdown-loader">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle class="background" cx="50" cy="50" r="45"/>
-              <circle class="progress" cx="50" cy="50" r="45"/>
-            </svg>
-            <div class="countdown-time">${secondsRemaining}s</div>
-          </div>
-          <h2>WELL DONE!</h2>
-          <p>Check back later for another round of practice.</p>
-        </div>
-      `;
-      
-      // Start countdown animation
-      const progressCircle = testContainer.querySelector('.progress');
-      const timeDisplay = testContainer.querySelector('.countdown-time');
-      const circumference = 2 * Math.PI * 45;
-      
-      progressCircle.style.strokeDasharray = circumference;
-      progressCircle.style.strokeDashoffset = 0;
-      
-      let timeLeft = secondsRemaining;
-      const countdownInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          clearInterval(countdownInterval);
-          loadNextWord();
-        } else {
-          timeDisplay.textContent = `${timeLeft}s`;
-          const progress = (timeLeft / secondsRemaining) * circumference;
-          progressCircle.style.strokeDashoffset = circumference - progress;
-        }
-      }, 1000);
-    }
-    
-    // Set focus to add word input if word list is open
-    if (wordListPanel.classList.contains('open')) {
-      newWordInput.focus();
-    }
+    testContainer.innerHTML = `
+      <div class="completion-message">
+        <h2>WELL DONE!</h2>
+        <p>All words have been practiced.</p>
+      </div>
+    `;
+    wordsCompleted = 0;
+    totalWordsForSession = 0;
+    updateProgress();
     return;
   }
   
@@ -367,10 +326,6 @@ function readWord(word) {
     alert("Sorry, your browser does not support speech synthesis.");
   }
 }
-
-// Variables for progress tracking
-let wordsCompleted = 0;
-let totalWordsForSession = 0;
 
 // Update progress display
 function updateProgress() {

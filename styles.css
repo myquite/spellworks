@@ -433,42 +433,6 @@ button.danger:hover {
   color: #dc3545;
 }
 
-/* Add loader styles */
-.countdown-loader {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto var(--spacing-large);
-  position: relative;
-}
-
-.countdown-loader svg {
-  transform: rotate(-90deg);
-}
-
-.countdown-loader circle {
-  fill: none;
-  stroke-width: 3;
-}
-
-.countdown-loader .background {
-  stroke: var(--color-border);
-}
-
-.countdown-loader .progress {
-  stroke: var(--color-primary);
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1s linear;
-}
-
-.countdown-time {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.2rem;
-  color: var(--color-primary);
-}
-
 /* GitHub Corner styles */
 .github-corner:hover .octo-arm {
   animation: octocat-wave 560ms ease-in-out;
