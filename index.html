@@ -34,24 +34,34 @@
       <button id="reset-button" class="danger">Reset List</button>
     </div>
 
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
-      <div class="progress-stats">
-        <span><span class="words-completed">0</span> / <span class="words-remaining">0</span></span>
-      </div>
-    </div>
-
     <div class="main-content">
       <div class="container">
-        <div id="test-container">
-          <!-- Test content will be injected here -->
-        </div>
         <div id="begin-lesson-container" class="begin-lesson-container">
           <h2>Ready to practice spelling?</h2>
           <p>Add words to your list and click the button below to start your lesson.</p>
           <button id="begin-lesson-btn" class="begin-lesson-btn">Begin Lesson</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="test-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+            <div class="progress-stats">
+              <span><span class="words-completed">0</span> / <span class="words-remaining">0</span></span>
+            </div>
+          </div>
+          <button class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-test-container">
+            <!-- Modal test content will be injected here -->
+          </div>
         </div>
       </div>
     </div>

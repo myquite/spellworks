@@ -2,6 +2,54 @@
 const wordListToggle = document.getElementById('word-list-toggle');
 const wordListPanel = document.getElementById('word-list-panel');
 
+// Modal elements
+const testModal = document.getElementById('test-modal');
+const modalTestContainer = document.getElementById('modal-test-container');
+const modalCloseBtn = document.querySelector('.modal-close');
+
+// Modal functionality
+function openModal() {
+  testModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  testModal.classList.remove('open');
+  document.body.style.overflow = '';
+  // Return to main page state
+  lessonStarted = false;
+  
+  // If lesson is completed, reset the state and show begin lesson container
+  if (wordsCompleted >= totalWords && totalWords > 0) {
+    wordsCompleted = 0;
+    updateProgress();
+  }
+  
+  // Always show the begin lesson container when modal is closed
+  beginLessonContainer.style.display = 'block';
+}
+
+// Modal event listeners
+modalCloseBtn.addEventListener('click', closeModal);
+
+// Close modal when clicking outside
+testModal.addEventListener('click', (e) => {
+  if (e.target === testModal) {
+    closeModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (testModal.classList.contains('open')) {
+      closeModal();
+    } else if (wordListPanel.classList.contains('open')) {
+      closeWordListPanel();
+    }
+  }
+});
+
 // Toggle panel when clicking the button
 wordListToggle.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -25,19 +73,17 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Add escape key to close panel
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && wordListPanel.classList.contains('open')) {
-    closeWordListPanel();
-  }
-});
-
 // Add resize listener to handle mobile/desktop transitions
 window.addEventListener('resize', () => {
   if (!isMobile()) {
     document.body.style.overflow = '';
   }
 });
+
+// Mobile detection function
+function isMobile() {
+  return window.innerWidth <= 768;
+}
 
 // Array to hold word objects
 // Each word object will have: { word }
@@ -47,7 +93,6 @@ let wordsData = [];
 const newWordInput = document.getElementById("new-word-input");
 const addWordButton = document.getElementById("add-word-button");
 const wordListEl = document.getElementById("word-list");
-const testContainer = document.getElementById("test-container");
 
 // Load words from localStorage when the page loads
 function loadWordsFromStorage() {
@@ -171,7 +216,7 @@ const beginLessonBtn = document.getElementById('begin-lesson-btn');
 
 function loadNextWord() {
   if (wordsData.length === 0) {
-    testContainer.innerHTML = '';
+    modalTestContainer.innerHTML = '';
     beginLessonContainer.style.display = 'block';
     beginLessonBtn.disabled = true;
     wordsCompleted = 0;
@@ -184,7 +229,7 @@ function loadNextWord() {
   
   // Show completion message when all words are done
   if (wordsCompleted >= totalWords) {
-    testContainer.innerHTML = `
+    const completionHTML = `
       <div class="completion-message">
         <h2>WELL DONE!</h2>
         <p>All words have been practiced.</p>
@@ -192,13 +237,22 @@ function loadNextWord() {
       </div>
     `;
     
+    modalTestContainer.innerHTML = completionHTML;
+    
     const practiceAgainBtn = document.querySelector('#practice-again');
-    practiceAgainBtn.addEventListener('click', () => {
-      wordsCompleted = 0;
-      lessonStarted = false;
-      updateProgress();
-      loadNextWord();
-    });
+    if (practiceAgainBtn) {
+      practiceAgainBtn.addEventListener('click', () => {
+        wordsCompleted = 0;
+        lessonStarted = false;
+        updateProgress();
+        closeModal();
+        // Start the lesson again
+        lessonStarted = true;
+        beginLessonContainer.style.display = 'none';
+        openModal();
+        loadNextWord();
+      });
+    }
     
     return;
   }
@@ -224,7 +278,7 @@ function loadNextWord() {
 
 // Start the test for a given word object
 function startTestForWord(wordObj) {
-  testContainer.innerHTML = "";
+  modalTestContainer.innerHTML = "";
 
   // Create all elements first
   const lettersContainer = document.createElement("div");
@@ -279,7 +333,8 @@ function startTestForWord(wordObj) {
     lettersContainer.appendChild(input);
     letterInputs.push(input);
   }
-  testContainer.appendChild(lettersContainer);
+  
+  modalTestContainer.appendChild(lettersContainer);
 
   const actionButtons = document.createElement("div");
   actionButtons.classList.add("action-buttons");
@@ -306,11 +361,15 @@ function startTestForWord(wordObj) {
 
   actionButtons.appendChild(readButton);
   actionButtons.appendChild(checkButton);
-  testContainer.appendChild(actionButtons);
+  modalTestContainer.appendChild(actionButtons);
 
-  // Remove feedback element creation and reference
+  // Add event listeners for buttons
   checkButton.addEventListener("click", () => {
     checkSpelling(wordObj, letterInputs);
+  });
+  
+  readButton.addEventListener("click", () => {
+    readWord(wordObj.word);
   });
 
   // Add this to handle mobile keyboard
@@ -324,16 +383,11 @@ function startTestForWord(wordObj) {
     });
   });
 
-  // Add the click event listener for the read button to play again
-  readButton.addEventListener("click", () => {
-    readWord(wordObj.word);
-  });
-
   // Play word and focus first input after everything is rendered
   requestAnimationFrame(() => {
     readWord(wordObj.word);
     setTimeout(() => {
-      letterInputs[0].focus();
+      if (letterInputs[0]) letterInputs[0].focus();
     }, 300);
   });
 }
@@ -413,5 +467,6 @@ beginLessonBtn.addEventListener('click', () => {
   
   lessonStarted = true;
   beginLessonContainer.style.display = 'none';
+  openModal();
   loadNextWord();
 }); 
