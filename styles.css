@@ -472,4 +472,47 @@ button.danger:hover {
 
 .practice-again-btn:hover {
   background: var(--color-secondary);
+}
+
+/* Begin Lesson styles */
+.begin-lesson-container {
+  text-align: center;
+  padding: var(--spacing-large);
+  margin-top: var(--spacing-large);
+  animation: fadeIn 0.5s ease;
+}
+
+.begin-lesson-container h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: var(--spacing-large);
+  color: var(--color-primary);
+}
+
+.begin-lesson-container p {
+  color: var(--color-tertiary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: var(--spacing-large);
+}
+
+.begin-lesson-btn {
+  padding: var(--spacing-large) calc(var(--spacing-large) * 2);
+  font-size: 1.2rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.begin-lesson-btn:hover {
+  background: var(--color-secondary);
+}
+
+.begin-lesson-btn:disabled {
+  background: var(--color-border);
+  color: var(--color-tertiary);
+  cursor: not-allowed;
 } 

@@ -92,6 +92,14 @@ function updateWordListDisplay() {
     li.appendChild(deleteBtn);
     wordListEl.appendChild(li);
   });
+  
+  // Update begin lesson button state
+  if (wordsData.length > 0) {
+    beginLessonBtn.disabled = false;
+  } else {
+    beginLessonBtn.disabled = true;
+  }
+  
   saveWordsToStorage();
 }
 
@@ -104,7 +112,12 @@ addWordButton.addEventListener("click", () => {
   });
   newWordInput.value = "";
   updateWordListDisplay();
-  loadNextWord();
+  
+  // If lesson hasn't started yet, show the begin lesson button
+  if (!lessonStarted) {
+    loadNextWord();
+  }
+  
   newWordInput.focus();
 });
 
@@ -123,6 +136,7 @@ resetButton.addEventListener('click', () => {
     localStorage.removeItem('spellingWords');
     wordsCompleted = 0;
     totalWords = 0;
+    lessonStarted = false;
     updateProgress();
     updateWordListDisplay();
     loadNextWord();
@@ -134,21 +148,32 @@ window.addEventListener("load", () => {
   loadWordsFromStorage();
   totalWords = wordsData.length;
   updateProgress();
+  
+  // Show begin lesson button initially
+  if (wordsData.length > 0) {
+    beginLessonBtn.disabled = false;
+  } else {
+    beginLessonBtn.disabled = true;
+  }
+  
+  // Don't start the lesson automatically - wait for user to click "Begin Lesson"
   loadNextWord();
 });
 
 // Variables for progress tracking
 let wordsCompleted = 0;
 let totalWords = wordsData.length;
+let lessonStarted = false;
+
+// DOM elements for lesson control
+const beginLessonContainer = document.getElementById('begin-lesson-container');
+const beginLessonBtn = document.getElementById('begin-lesson-btn');
 
 function loadNextWord() {
   if (wordsData.length === 0) {
-    testContainer.innerHTML = `
-      <div class="completion-message">
-        <h2>WELCOME!</h2>
-        <p>Please add some words to your list to get started.</p>
-      </div>
-    `;
+    testContainer.innerHTML = '';
+    beginLessonContainer.style.display = 'block';
+    beginLessonBtn.disabled = true;
     wordsCompleted = 0;
     totalWords = 0;
     updateProgress();
@@ -170,10 +195,17 @@ function loadNextWord() {
     const practiceAgainBtn = document.querySelector('#practice-again');
     practiceAgainBtn.addEventListener('click', () => {
       wordsCompleted = 0;
+      lessonStarted = false;
       updateProgress();
       loadNextWord();
     });
     
+    return;
+  }
+  
+  // Only start the test if the lesson has been started
+  if (!lessonStarted) {
+    beginLessonContainer.style.display = 'block';
     return;
   }
   
@@ -370,4 +402,16 @@ function closeWordListPanel() {
 
 // Add close button functionality
 const closeButton = document.querySelector('.close-panel');
-closeButton.addEventListener('click', closeWordListPanel); 
+closeButton.addEventListener('click', closeWordListPanel);
+
+// Begin Lesson button functionality
+beginLessonBtn.addEventListener('click', () => {
+  if (wordsData.length === 0) {
+    alert('Please add some words to your list before starting the lesson.');
+    return;
+  }
+  
+  lessonStarted = true;
+  beginLessonContainer.style.display = 'none';
+  loadNextWord();
+}); 
