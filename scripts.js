@@ -350,6 +350,17 @@ function startTestForWord(wordObj) {
     Listen
   `;
   
+  const spellButton = document.createElement("button");
+  spellButton.classList.add("icon-button", "spell");
+  spellButton.innerHTML = `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+      <path d="M2 17l10 5 10-5"/>
+      <path d="M2 12l10 5 10-5"/>
+    </svg>
+    Spell
+  `;
+  
   const checkButton = document.createElement("button");
   checkButton.classList.add("icon-button", "check");
   checkButton.innerHTML = `
@@ -360,6 +371,7 @@ function startTestForWord(wordObj) {
   `;
 
   actionButtons.appendChild(readButton);
+  actionButtons.appendChild(spellButton);
   actionButtons.appendChild(checkButton);
   modalTestContainer.appendChild(actionButtons);
 
@@ -370,6 +382,10 @@ function startTestForWord(wordObj) {
   
   readButton.addEventListener("click", () => {
     readWord(wordObj.word);
+  });
+  
+  spellButton.addEventListener("click", () => {
+    spellWord(wordObj.word);
   });
 
   // Add this to handle mobile keyboard
@@ -395,10 +411,79 @@ function startTestForWord(wordObj) {
 // Use the Web Speech API to read the word aloud
 function readWord(word) {
   if ("speechSynthesis" in window) {
+    // Stop any currently playing speech
+    window.speechSynthesis.cancel();
+    
     const utterance = new SpeechSynthesisUtterance(word);
-    utterance.rate = 0.7; // Slower speed (0.1 to 10, 1.0 is normal speed)
-    utterance.pitch = 1.0; // Normal pitch
-    window.speechSynthesis.speak(utterance);
+    
+    // Enhanced settings for new learners
+    utterance.rate = 0.5; // Much slower speed for better comprehension
+    utterance.pitch = 1.1; // Slightly higher pitch for clarity
+    utterance.volume = 1.0; // Full volume
+    
+    // Try to get a clear, educational voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoices = voices.filter(voice => 
+      voice.lang.startsWith('en') && 
+      (voice.name.includes('Google') || voice.name.includes('Samantha') || voice.name.includes('Alex'))
+    );
+    
+    if (preferredVoices.length > 0) {
+      utterance.voice = preferredVoices[0];
+    }
+    
+    // Add a small pause before speaking for better focus
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 100);
+    
+  } else {
+    alert("Sorry, your browser does not support speech synthesis.");
+  }
+}
+
+// Spell out the word letter by letter
+function spellWord(word) {
+  if ("speechSynthesis" in window) {
+    // Stop any currently playing speech
+    window.speechSynthesis.cancel();
+    
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoices = voices.filter(voice => 
+      voice.lang.startsWith('en') && 
+      (voice.name.includes('Google') || voice.name.includes('Samantha') || voice.name.includes('Alex'))
+    );
+    
+    // Create a sequence of utterances for each letter
+    const letters = word.split('');
+    let currentIndex = 0;
+    
+    function speakNextLetter() {
+      if (currentIndex < letters.length) {
+        const utterance = new SpeechSynthesisUtterance(letters[currentIndex]);
+        
+        // Even slower rate for letter-by-letter spelling
+        utterance.rate = 0.4;
+        utterance.pitch = 1.1;
+        utterance.volume = 1.0;
+        
+        if (preferredVoices.length > 0) {
+          utterance.voice = preferredVoices[0];
+        }
+        
+        utterance.onend = () => {
+          currentIndex++;
+          // Add a small pause between letters
+          setTimeout(speakNextLetter, 300);
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+    
+    // Start spelling after a brief pause
+    setTimeout(speakNextLetter, 100);
+    
   } else {
     alert("Sorry, your browser does not support speech synthesis.");
   }
